@@ -1,0 +1,14 @@
+[project]
+name = "venusc-ice"
+description = "Venus internal compiler error system"
+version = "0.1.0"
+readme = "README.md"
+
+requires-python = ">=3.12"
+
+[project.license]
+file = "LICENSE"
+
+[[project.authors]]
+name = "Qexat"
+email = "contact@qexat.com"
