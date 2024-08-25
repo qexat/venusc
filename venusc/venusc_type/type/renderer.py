@@ -22,7 +22,7 @@ class TypeRenderer(TypeVisitor[str]):
     """
 
     # TODO: move this method to a dedicated colorer class
-    def render_type_name(self, name: str) -> str:
+    def render_type_name(self, name: str) -> str:  # noqa: PLR6301
         """
         Render a type name.
 
@@ -34,7 +34,7 @@ class TypeRenderer(TypeVisitor[str]):
         return f"\x1b[38;2;183;137;46m{name}\x1b[39m"
 
     # TODO: move this method to a dedicated colorer class
-    def render_type_variable_name(self, name: str) -> str:
+    def render_type_variable_name(self, name: str) -> str:  # noqa: PLR6301
         """
         Render a type variable name.
 

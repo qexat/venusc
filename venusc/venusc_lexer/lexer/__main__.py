@@ -18,7 +18,7 @@ def main() -> None:
     """
 
     with contextlib.suppress(ModuleNotFoundError):
-        import readline  # noqa: F401  # pyright: ignore[reportUnusedImport]
+        import readline  # noqa: F401, PLC0415 # pyright: ignore[reportUnusedImport]
 
     try:
         while True:

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import enum
 
-import type
+import type  # noqa: A004
 
 from .category import Atom
 from .category import Grouper

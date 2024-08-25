@@ -1,5 +1,6 @@
 fix = true
-unsafe-fixes = true
+unsafe-fixes = false
+preview = true
 
 exclude = [".venv", "build", "dist"]
 

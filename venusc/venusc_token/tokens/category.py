@@ -13,7 +13,7 @@ from .infix import Associativity
 from .infix import PrecedenceIndex
 
 if typing.TYPE_CHECKING:
-    import type
+    import type  # noqa: A004
 
 
 class TokenKindCategoryVisitor[R_co](typing.Protocol):
