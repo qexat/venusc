@@ -11,6 +11,7 @@ import type  # noqa: A004
 from .category import Atom
 from .category import Grouper
 from .category import Keyword
+from .category import KeywordKind
 from .category import Literal
 from .category import Miscellaneous
 from .category import Operator
@@ -31,20 +32,20 @@ class TokenKind(enum.Enum):
     RIGHT_BRACKET = Grouper("]")
     RIGHT_PAREN = Grouper(")")
 
-    AND = Keyword("and", leading=False)
-    CASE = Keyword("case", leading=False)
-    DISCARD = Keyword("discard")
-    ELSE = Keyword("else", leading=False)
-    END = Keyword("end", leading=False)
-    FIX = Keyword("fix")
-    IF = Keyword("if")
-    LET = Keyword("let")
-    MATCH = Keyword("match")
-    OR = Keyword("or", leading=False)
-    PROOF = Keyword("proof")
-    THEN = Keyword("then", leading=False)
-    USE = Keyword("use")
-    WHERE = Keyword("where", leading=False)
+    AND = Keyword("and", KeywordKind.EXPRESSION_CONJUNCTIVE)
+    CASE = Keyword("case", KeywordKind.EXPRESSION_CONJUNCTIVE)
+    DISCARD = Keyword("discard", KeywordKind.EXPRESSION_STARTER)
+    ELSE = Keyword("else", KeywordKind.EXPRESSION_CONJUNCTIVE)
+    END = Keyword("end", KeywordKind.EXPRESSION_CONJUNCTIVE)
+    FIX = Keyword("fix", KeywordKind.STATEMENT_STARTER)
+    IF = Keyword("if", KeywordKind.EXPRESSION_STARTER)
+    LET = Keyword("let", KeywordKind.STATEMENT_STARTER)
+    MATCH = Keyword("match", KeywordKind.EXPRESSION_STARTER)
+    OR = Keyword("or", KeywordKind.EXPRESSION_CONJUNCTIVE)
+    PROOF = Keyword("proof", KeywordKind.STATEMENT_STARTER)  # unused
+    THEN = Keyword("then", KeywordKind.EXPRESSION_CONJUNCTIVE)
+    USE = Keyword("use", KeywordKind.STATEMENT_STARTER)
+    WHERE = Keyword("where", KeywordKind.STATEMENT_CONJUNCTIVE)
 
     NATURAL = Literal(type.PrimitiveKind.NATURAL)
     STRING = Literal(type.PrimitiveKind.STRING)
@@ -78,8 +79,70 @@ class TokenKind(enum.Enum):
     LESS_EQUAL = Relation("<=")
 
 
-KEYWORD_MAPPING: dict[str, TokenKind] = {
+# "Identifier-alike" includes keywords or any operator that would, without
+# knowledge of its existence, be tokenized as an identifier.
+IDENTIFIER_ALIKE_MAPPING: dict[str, TokenKind] = {
     kind.value.lexeme: kind
     for kind in TokenKind
     if kind.value.is_identifier_alike
 }
+
+
+def starts_statement(kind: TokenKind) -> bool:
+    """
+    Checks whether the given token kind is a statement starter.
+
+    Returns
+    -------
+    bool
+    """
+
+    return (
+        isinstance(kind.value, Keyword)
+        and kind.value.kind is KeywordKind.STATEMENT_STARTER
+    )
+
+
+def is_statement_conjunctive(kind: TokenKind) -> bool:
+    """
+    Checks whether the given token kind is a statement conjunctive.
+
+    Returns
+    -------
+    bool
+    """
+
+    return (
+        isinstance(kind.value, Keyword)
+        and kind.value.kind is KeywordKind.STATEMENT_CONJUNCTIVE
+    )
+
+
+def starts_expression(kind: TokenKind) -> bool:
+    """
+    Checks whether the given token kind is an expression starter.
+
+    Returns
+    -------
+    bool
+    """
+
+    return (
+        isinstance(kind.value, Keyword)
+        and kind.value.kind is KeywordKind.EXPRESSION_STARTER
+    )
+
+
+def is_expression_conjunctive(kind: TokenKind) -> bool:
+    """
+    Checks whether the given token kind is an expression conjunctive.
+
+    Returns
+    -------
+    bool
+    """
+
+    return (
+        isinstance(kind.value, Keyword)
+        and kind.value.kind is KeywordKind.EXPRESSION_CONJUNCTIVE
+    )

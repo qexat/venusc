@@ -5,6 +5,7 @@ Definition of the token kind categories.
 from __future__ import annotations
 
 import abc
+import enum
 import typing
 
 import attrs
@@ -14,6 +15,21 @@ from .infix import PrecedenceIndex
 
 if typing.TYPE_CHECKING:
     import type  # noqa: A004
+
+
+class KeywordKind(enum.Enum):
+    """
+    Represents the kind of a keyword.
+    """
+
+    # Keywords that initiate a statement (`fix`, `let`...)
+    STATEMENT_STARTER = enum.auto()
+    # Keywords that appear within a statement (`where`...)
+    STATEMENT_CONJUNCTIVE = enum.auto()
+    # Keywords that initiate an expression (`if`, `match`...)
+    EXPRESSION_STARTER = enum.auto()
+    # Keywords that appear within an expression (`else`, `then`...)
+    EXPRESSION_CONJUNCTIVE = enum.auto()
 
 
 class TokenKindCategoryVisitor[R_co](typing.Protocol):
@@ -119,7 +135,7 @@ class Keyword(AbstractTokenKindCategory):
     """
 
     lexeme: str
-    leading: bool = attrs.field(default=True, kw_only=True)
+    kind: KeywordKind
     is_identifier_alike: bool = attrs.field(default=True, kw_only=True)
 
     @typing.override
