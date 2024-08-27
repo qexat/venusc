@@ -288,6 +288,7 @@ class Lexer:
 
             token_list.append(self.build_token(scan_result.unwrap()))
 
+        self.reset_start()
         token_list.append(self.build_token(tokens.TokenKind.EOF))
 
         return result.Ok(token_list)
