@@ -61,6 +61,12 @@ class ExprVisitor[R_co](typing.Protocol):
         """
         ...
 
+    def visit_infix_expr(self, expr: InfixExpr) -> R_co:
+        """
+        Visit an infix (operator) expression.
+        """
+        ...
+
     def visit_list_expr(self, expr: ListExpr) -> R_co:
         """
         Visit an list literal expression.
@@ -76,6 +82,18 @@ class ExprVisitor[R_co](typing.Protocol):
     def visit_match_expr(self, expr: MatchExpr) -> R_co:
         """
         Visit a match-case-end expression.
+        """
+        ...
+
+    def visit_prefix_expr(self, expr: PrefixExpr) -> R_co:
+        """
+        Visit a prefix (operator) expression.
+        """
+        ...
+
+    def visit_relation_expr(self, expr: RelationExpr) -> R_co:
+        """
+        Visit a relation expression.
         """
         ...
 
@@ -229,6 +247,25 @@ class IfExpr(AbstractExpr):
 
 
 @attrs.frozen
+class InfixExpr(AbstractExpr):
+    """
+    Represents an infix (operator) expression.
+
+    ```
+    left operator right
+    ```
+    """
+
+    operator: tokens.Operator
+    left: Expr
+    right: Expr
+
+    @typing.override
+    def accept[R](self, visitor: ExprVisitor[R]) -> R:
+        return visitor.visit_infix_expr(self)
+
+
+@attrs.frozen
 class ListExpr(AbstractExpr):
     """
     Represents an expression consisting of a list literal.
@@ -279,6 +316,43 @@ class MatchExpr(AbstractExpr):
 
 
 @attrs.frozen
+class PrefixExpr(AbstractExpr):
+    """
+    Represents a prefix (operator) expression.
+
+    ```
+    operator right
+    ```
+    """
+
+    operator: tokens.Operator
+    right: Expr
+
+    @typing.override
+    def accept[R](self, visitor: ExprVisitor[R]) -> R:
+        return visitor.visit_prefix_expr(self)
+
+
+@attrs.frozen
+class RelationExpr(AbstractExpr):
+    """
+    Represents a relation expression.
+
+    ```
+    left operator right
+    ```
+    """
+
+    operator: tokens.Relation
+    left: Expr
+    right: Expr
+
+    @typing.override
+    def accept[R](self, visitor: ExprVisitor[R]) -> R:
+        return visitor.visit_relation_expr(self)
+
+
+@attrs.frozen
 class TupleExpr(AbstractExpr):
     """
     Represents an expression consisting of a tuple literal.
@@ -303,8 +377,11 @@ type Expr = (
     | GroupingExpr
     | IdentifierExpr
     | IfExpr
+    | InfixExpr
     | ListExpr
     | LiteralExpr
     | MatchExpr
+    | PrefixExpr
+    | RelationExpr
     | TupleExpr
 )
