@@ -10,6 +10,10 @@ import typing
 
 import attrs
 
+if typing.TYPE_CHECKING:
+    import tokens
+    import vast
+
 
 class SyntaxErrorVisitor[R_co](typing.Protocol):
     """
@@ -67,6 +71,15 @@ class GrammarErrorVisitor[R_co](typing.Protocol):
         """
         ...
 
+    def visit_incorrect_keyword_kind_error(
+        self,
+        error: IncorrectKeywordKindError,
+    ) -> R_co:
+        """
+        Visit an incorrect keyword kind error.
+        """
+        ...
+
     def visit_keyword_misuse_error(
         self,
         error: KeywordMisuseError,
@@ -76,12 +89,30 @@ class GrammarErrorVisitor[R_co](typing.Protocol):
         """
         ...
 
+    def visit_mismatched_tokens_error(
+        self,
+        error: MismatchedTokensError,
+    ) -> R_co:
+        """
+        Visit a mismatched tokens error.
+        """
+        ...
+
     def visit_unexpected_eof_error(
         self,
         error: UnexpectedEofError,
     ) -> R_co:
         """
         Visit an unexpected EOF error.
+        """
+        ...
+
+    def visit_unexpected_first_class_expression_error(
+        self,
+        error: UnexpectedFirstClassExpressionError,
+    ) -> R_co:
+        """
+        Visit an unexpected first class expression error.
         """
         ...
 
@@ -311,3 +342,126 @@ class AbstractGrammarError(AbstractCompilationError):
     @typing.override
     def accept[R](self, visitor: GrammarErrorVisitor[R]) -> R:
         pass
+
+
+@attrs.frozen
+class IncompleteExpressionError(AbstractGrammarError):
+    """
+    Error triggered when an incomplete expression/statement is encountered.
+    """
+
+    node_type: type[vast.AstNode]
+    missing_parts: list[str]
+
+    @typing.override
+    def accept[R](self, visitor: GrammarErrorVisitor[R]) -> R:
+        return visitor.visit_incomplete_expression_error(self)
+
+
+@attrs.frozen
+class IncorrectKeywordKindError(AbstractGrammarError):
+    """
+    Error triggered when an expression keyword is mistakenly used to start a
+    statement.
+    """
+
+    keyword: tokens.Token
+
+    @typing.override
+    def accept[R](self, visitor: GrammarErrorVisitor[R]) -> R:
+        return visitor.visit_incorrect_keyword_kind_error(self)
+
+
+@attrs.frozen
+class KeywordMisuseError(AbstractGrammarError):
+    """
+    Error triggered when a keyword is used in a place where it does not make
+    sense.
+    """
+
+    keyword: tokens.Token
+
+    @typing.override
+    def accept[R](self, visitor: GrammarErrorVisitor[R]) -> R:
+        return visitor.visit_keyword_misuse_error(self)
+
+
+@attrs.frozen
+class MismatchedTokensError(AbstractGrammarError):
+    """
+    Error triggered when a token kind is expected, but another is found.
+    """
+
+    expected: tokens.TokenKind
+    found: tokens.Token
+
+    @typing.override
+    def accept[R](self, visitor: GrammarErrorVisitor[R]) -> R:
+        return visitor.visit_mismatched_tokens_error(self)
+
+
+@attrs.frozen
+class UnexpectedEofError(AbstractGrammarError):
+    """
+    Error triggered when the end of file is found during parsing an expression
+    or a statement.
+    """
+
+    node_type: type[vast.AstNode]
+
+    @typing.override
+    def accept[R](self, visitor: GrammarErrorVisitor[R]) -> R:
+        return visitor.visit_unexpected_eof_error(self)
+
+
+@attrs.frozen
+class UnexpectedFirstClassExpressionError(AbstractGrammarError):
+    """
+    Error triggered when a first-class expression is used.
+    Indeed, there is no expression statement in Venus.
+    """
+
+    unexpected_expr: vast.Expr
+
+    @typing.override
+    def accept[R](self, visitor: GrammarErrorVisitor[R]) -> R:
+        return visitor.visit_unexpected_first_class_expression_error(self)
+
+
+@attrs.frozen
+class UnexpectedTokenError(AbstractGrammarError):
+    """
+    Error triggered when an unexpected token is found. (generic fallback)
+    """
+
+    token: tokens.Token
+
+    @typing.override
+    def accept[R](self, visitor: GrammarErrorVisitor[R]) -> R:
+        return visitor.visit_unexpected_token_error(self)
+
+
+@attrs.frozen
+class UnmatchedBracketError(AbstractGrammarError):
+    """
+    Error triggered when an unmatched bracket was found.
+    """
+
+    unmatched: tokens.Token
+    expected: tokens.TokenKind
+
+    @typing.override
+    def accept[R](self, visitor: GrammarErrorVisitor[R]) -> R:
+        return visitor.visit_unmatched_bracket_error(self)
+
+
+type GrammarError = (
+    IncompleteExpressionError
+    | IncorrectKeywordKindError
+    | KeywordMisuseError
+    | MismatchedTokensError
+    | UnexpectedEofError
+    | UnexpectedFirstClassExpressionError
+    | UnexpectedTokenError
+    | UnmatchedBracketError
+)
